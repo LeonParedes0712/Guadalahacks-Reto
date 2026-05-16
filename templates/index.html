@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sentinel AI</title>
+  <link rel="stylesheet" href="/static/style.css" />
+</head>
+<body>
+  <header class="hero">
+    <div class="badge">AI RUNNING LOCALLY</div>
+    <h1>Sentinel AI</h1>
+    <p>Private • Offline • Real-time</p>
+  </header>
+
+  <main class="dashboard">
+    <section class="card control-card">
+      <h2>Voice Assistant</h2>
+      <p id="status">STANDBY</p>
+      <button id="recordBtn">Grabar audio</button>
+    </section>
+
+    <section class="card">
+      <h2>Transcripción</h2>
+      <p id="transcriptText">Esperando audio...</p>
+    </section>
+
+    <section class="card">
+      <h2>Intent detectado</h2>
+      <p id="intentText">Sin detectar</p>
+      <div class="confidence-container">
+        <div id="confidenceBar"></div>
+      </div>
+      <p id="confidenceText">Confidence: 0%</p>
+    </section>
+
+    <section class="card response-card">
+      <h2>Respuesta del sistema</h2>
+      <p id="responseText">Aquí aparecerá la respuesta contextual.</p>
+    </section>
+
+    <section class="card emergency-card">
+      <h2>Modo emergencia</h2>
+      <p id="emergencyText">Sin emergencia detectada.</p>
+    </section>
+
+    <section class="card">
+      <h2>Historial</h2>
+      <ul id="historyList"></ul>
+    </section>
+  </main>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>
