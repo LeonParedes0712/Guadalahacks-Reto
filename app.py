@@ -12,7 +12,7 @@ def home():
 @app.route("/test")
 def test():
 
-    segments, info = model.transcribe("audio.wav.mp3", language="es")
+    segments, info = model.transcribe("audio_capture.wav", language="es")
 
     texto = ""
 
