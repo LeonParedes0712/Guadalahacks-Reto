@@ -1,3 +1,4 @@
+<<<<<<< Updated upstream
 from flask import Flask
 from faster_whisper import WhisperModel
 
@@ -23,3 +24,21 @@ def test():
 
 if __name__ == "__main__":
     app.run(debug=True)
+=======
+from flask import Flask, request, jsonify
+from transcriber import transcribe_audio
+
+app = Flask(__name__)
+
+@app.route("/transcribe", methods=["POST"])
+def transcribe():
+    audio = request.files["audio"]
+    path = "uploads/audio.wav"
+    audio.save(path)
+
+    texto = transcribe_audio(path)
+
+    return jsonify({
+        "text": texto
+    })
+>>>>>>> Stashed changes
