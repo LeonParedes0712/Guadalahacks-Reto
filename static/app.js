@@ -184,6 +184,26 @@ function updateDashboard(data) {
     emergencyText.textContent = "Sin emergencia detectada.";
     emergencyCard.classList.remove("emergency-active");
   }
+    // Mostrar cards principales después de una interacción
+  document.body.classList.remove("mode-idle");
+  recorderPanel?.classList.remove("hidden");
+
+  showCard("response");
+  showCard("transcript");
+  showCard("intent");
+  showCard("history");
+
+  if (intent === "emergency") {
+    showCard("emergency");
+  }
+
+  if (intent === "notes") {
+    showCard("notes");
+  }
+
+  if (intent === "productivity") {
+    showCard("tasks");
+  }
 }
 
 // ──────────────────────────────────────────────
@@ -267,3 +287,90 @@ async function markDone(index) {
 loadHistory();
 loadNotes();
 loadTasks();
+
+// ──────────────────────────────────────────────
+// Sidebar / vistas dinámicas
+// ──────────────────────────────────────────────
+const navItems = document.querySelectorAll(".nav-item");
+const recorderPanel = document.querySelector(".recorder-panel");
+const cardsArea = document.querySelector(".cards-area");
+const allCards = document.querySelectorAll("[data-card]");
+const sidebarToggle = document.getElementById("sidebarToggle");
+const sidebar = document.getElementById("sidebar");
+
+function hideAllCards() {
+  allCards.forEach(card => {
+    card.classList.add("hidden");
+    card.classList.remove("view-active");
+  });
+}
+
+function showCard(cardName) {
+  const card = document.querySelector(`[data-card="${cardName}"]`);
+  if (card) {
+    card.classList.remove("hidden");
+    card.classList.add("view-active");
+  }
+}
+
+function setActiveNav(view) {
+  navItems.forEach(item => {
+    item.classList.toggle("nav-active", item.dataset.view === view);
+  });
+}
+
+function showView(view) {
+  setActiveNav(view);
+
+  // Inicio / nuevo comando
+  if (view === "home") {
+    document.body.classList.add("mode-idle");
+    recorderPanel?.classList.remove("hidden");
+    hideAllCards();
+    return;
+  }
+
+  document.body.classList.remove("mode-idle");
+  recorderPanel?.classList.add("hidden");
+  hideAllCards();
+
+  if (view === "history") {
+    showCard("history");
+    loadHistory();
+  }
+
+  if (view === "notes") {
+    showCard("notes");
+    loadNotes();
+  }
+
+  if (view === "tasks") {
+    showCard("tasks");
+    loadTasks();
+  }
+
+  if (view === "emergency") {
+    showCard("emergency");
+  }
+}
+
+navItems.forEach(item => {
+  item.addEventListener("click", () => {
+    const view = item.dataset.view;
+    showView(view);
+
+    if (sidebar) {
+      sidebar.classList.remove("sidebar-open");
+    }
+  });
+});
+
+if (sidebarToggle && sidebar) {
+  sidebarToggle.addEventListener("click", () => {
+    sidebar.classList.toggle("sidebar-open");
+  });
+}
+
+// Estado inicial
+hideAllCards();
+showView("home");

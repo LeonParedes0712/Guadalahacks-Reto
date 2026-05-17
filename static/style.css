@@ -732,3 +732,40 @@ body.mode-idle .cards-row { display: none; }
   .response-row { flex-direction: column; }
   .avatar-slot { width: 48px; height: 48px; }
 }
+
+.hidden {
+  display: none !important;
+}
+
+.view-active {
+  display: block;
+}
+
+.nav-item {
+  cursor: pointer;
+}
+
+.nav-active {
+  background: #ffffff;
+  color: #102747;
+  font-weight: 700;
+}
+
+.card.view-active {
+  animation: fadeInUp 0.18s ease-out;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.sidebar.sidebar-open {
+  transform: translateX(0);
+}
