@@ -257,6 +257,75 @@ def _open_spotify() -> dict:
         "action_type": "local_app",
     }
 
+def _open_office_app(app: str) -> dict:
+    """
+    Abre apps de Microsoft Office en Windows o Mac sin usar APIs externas.
+    Solo intenta abrir la aplicación instalada localmente.
+    """
+
+    office_apps = {
+        "excel": {
+            "windows": "start excel",
+            "mac": "Microsoft Excel",
+            "display": "Excel",
+        },
+        "word": {
+            "windows": "start winword",
+            "mac": "Microsoft Word",
+            "display": "Word",
+        },
+        "powerpoint": {
+            "windows": "start powerpnt",
+            "mac": "Microsoft PowerPoint",
+            "display": "PowerPoint",
+        },
+        "outlook": {
+            "windows": "start outlook",
+            "mac": "Microsoft Outlook",
+            "display": "Outlook",
+        },
+        "onenote": {
+            "windows": "start onenote",
+            "mac": "Microsoft OneNote",
+            "display": "OneNote",
+        },
+        "teams": {
+            "windows": "start msteams",
+            "mac": "Microsoft Teams",
+            "display": "Microsoft Teams",
+        },
+    }
+
+    config = office_apps.get(app)
+
+    if not config:
+        return {
+            "response": "No reconozco esa aplicación de Office.",
+            "action_executed": False,
+            "action_type": "office_app",
+        }
+
+    if _is_windows():
+        ok, error = _run_command(config["windows"], shell=True)
+
+    elif _is_macos():
+        ok, error = _run_command(["open", "-a", config["mac"]])
+
+    else:
+        ok, error = False, None
+
+    if ok:
+        return {
+            "response": f"Abriendo {config['display']}.",
+            "action_executed": True,
+            "action_type": "office_app",
+        }
+
+    return {
+        "response": f"No pude abrir {config['display']}. Verifica que esté instalado.",
+        "action_executed": False,
+        "action_type": "office_app",
+    }
 
 # ══════════════════════════════════════════════
 # Extras web opcionales
@@ -300,6 +369,7 @@ def _open_youtube_search(text: str) -> dict:
 
 
 # ══════════════════════════════════════════════
+# ══════════════════════════════════════════════
 # SYSTEM
 # ══════════════════════════════════════════════
 def _handle_system(text: str) -> dict | None:
@@ -307,28 +377,14 @@ def _handle_system(text: str) -> dict | None:
     Detecta qué app/página/carpeta quiere abrir el usuario dentro del intent system.
     """
 
-    # Búsquedas web y accesos rápidos se revisan primero.
-    search_result = modes.web_search(text)
-    if search_result is not None:
-        return search_result
-
-    web_result = modes.open_web_shortcut(text)
-    if web_result is not None:
-        return web_result
-
-    if _contains_any(text, ["descargas", "downloads", "documentos", "documents", "escritorio", "desktop", "apuntes"]):
-        return modes.handle_files(text)
-
-    if _contains_any(text, ["sube volumen", "baja volumen", "silencia", "mute", "play pause", "pausa musica", "siguiente cancion", "cancion anterior"]):
-        return modes.handle_media(text)
-
-    if _contains_any(text, ["calculadora", "calculator", "calc"]):
+    # Apps locales normales
+    if _contains_any(text, ["calculadora", "calculator", "calculador", "calc"]):
         return _open_calculator()
 
-    if _contains_any(text, ["bloc de notas", "notepad", "notas de windows", "textedit"]):
+    if _contains_any(text, ["bloc de notas", "notepad", "notepads", "nota pad", "notas de windows", "textedit", "editor de texto"]):
         return _open_notepad()
 
-    if _contains_any(text, ["explorador", "archivos", "carpeta", "file explorer", "finder"]):
+    if _contains_any(text, ["explorador", "explorador de archivos", "archivos", "carpeta", "file explorer", "finder"]):
         return _open_explorer()
 
     if _contains_any(text, ["vs code", "visual studio code", "vscode"]):
@@ -337,16 +393,136 @@ def _handle_system(text: str) -> dict | None:
     if _contains_any(text, ["spotify"]):
         return _open_spotify()
 
-    if _contains_any(text, ["youtube", "you tube"]):
-        return _open_youtube_search(text)
+    # Microsoft Office / productividad local
+    if _contains_any(text, ["excel", "hoja de calculo", "hoja de cálculo"]):
+        return _open_office_app("excel")
 
-    if _contains_any(text, ["navegador", "google", "browser", "chrome"]):
+    if _contains_any(text, ["word", "documento de word", "procesador de texto"]):
+        return _open_office_app("word")
+
+    if _contains_any(text, ["powerpoint", "power point", "presentacion", "presentación", "diapositivas"]):
+        return _open_office_app("powerpoint")
+
+    if _contains_any(text, ["outlook", "correo de outlook", "mail de outlook"]):
+        return _open_office_app("outlook")
+
+    if _contains_any(text, ["onenote", "one note"]):
+        return _open_office_app("onenote")
+
+    if _contains_any(text, ["teams", "microsoft teams"]):
+        return _open_office_app("teams")
+
+    # Carpetas locales
+    if _contains_any(text, [
+        "descargas", "downloads",
+        "documentos", "documents",
+        "escritorio", "desktop",
+        "apuntes", "mis apuntes",
+        "carpeta de apuntes",
+    ]):
+        return modes.handle_files(text)
+
+    # Multimedia
+    if _contains_any(text, [
+        "sube volumen", "subir volumen",
+        "baja volumen", "bajar volumen",
+        "silencia", "mute",
+        "play pause",
+        "pausa musica", "pausa música",
+        "reproduce musica", "reproduce música",
+        "siguiente cancion", "siguiente canción",
+        "cancion anterior", "canción anterior",
+    ]):
+        return modes.handle_media(text)
+
+        # GitHub: normal + errores comunes de Whisper
+    if _contains_any(text, [
+        "github",
+        "git hub",
+        "guit hub",
+        "githab",
+        "gitjab",
+        "kit hub",
+        "kithub",
+        "kid hu",
+        "kidhu",
+        "kitho",
+        "vit hub",
+        "vithub",
+        "vitzhub",
+        "gijub",
+    ]):
+        webbrowser.open("https://github.com")
+        return {
+            "response": "Abriendo GitHub.",
+            "action_executed": True,
+            "action_type": "web_extra",
+        }
+
+    # ChatGPT: normal + errores comunes de Whisper
+    if _contains_any(text, [
+        "chatgpt",
+        "chat gpt",
+        "chat g p t",
+        "chet gpt",
+        "chetpiti",
+        "chetipiti",
+        "cheetum",
+        "chit gpt",
+        "chad gpt",
+    ]):
+        webbrowser.open("https://chat.openai.com")
+        return {
+            "response": "Abriendo ChatGPT.",
+            "action_executed": True,
+            "action_type": "web_extra",
+        }
+
+    # Claude: usar alias más fáciles para Whisper
+    if _contains_any(text, [
+        "claude",
+        "clod",
+        "cloud",
+        "clad",
+        "asistente naranja",
+        "abre asistente naranja",
+        "abre el asistente",
+        "asistente",
+        "abre inteligencia artificial",
+        "inteligencia artificial",
+        "abre ia",
+        "ia",
+        "chatbot",
+        "chat bot",
+        "abre chatbot",
+        "anthropic",
+        "antropic",
+    ]):
+        webbrowser.open("https://claude.ai")
+        return {
+            "response": "Abriendo Claude.",
+            "action_executed": True,
+            "action_type": "web_extra",
+        }
+
+    if _contains_any(text, ["google", "navegador", "browser", "chrome"]):
         return _open_browser_google()
+
+    # Otros shortcuts web de assistant_modes: gmail, drive, calendar, etc.
+    web_result = modes.open_web_shortcut(text)
+    if web_result is not None:
+        return web_result
+
+    # Búsquedas web al final para que no robe comandos normales
+    search_result = modes.web_search(text)
+    if search_result is not None:
+        return search_result
 
     return {
         "response": (
             "Modo sistema detectado. Puedo abrir calculadora, bloc de notas, "
-            "explorador de archivos, VS Code, Spotify, YouTube o el navegador."
+            "explorador de archivos, VS Code, Spotify, Office, carpetas, YouTube, "
+            "Google, GitHub, ChatGPT o Claude."
         ),
         "action_executed": False,
         "action_type": "none",
@@ -391,10 +567,6 @@ def _handle_time(text: str) -> dict:
         "action_type": "local_info",
     }
 
-
-# ══════════════════════════════════════════════
-# FUN
-# ══════════════════════════════════════════════
 def _handle_fun(text: str) -> dict:
     line = random.choice(_FUN_LINES)
 
@@ -458,35 +630,30 @@ def _handle_emotional(text: str) -> dict:
 def _handle_class_mode(text: str) -> dict:
     t = _normalize(text)
 
-    # Activar modo clase
+    # Detener modo clase PRIMERO.
+    # "desactiva modo clase" contiene "activa modo clase",
+    # por eso apagar debe revisarse antes que activar.
     if any(k in t for k in [
-        "activa modo clase", "empieza modo clase",
-        "empieza a grabar la clase", "graba la clase",
-        "inicia modo clase", "modo clase on",
-    ]):
-        result = cm.start_class_session()
-        return {
-            "response": result["message"],
-            "action_executed": result["ok"],
-            "action_type": "class_mode",
-            "class_mode_active": result["ok"],
-            "class_file_path": result.get("file_path"),
-            "class_notes": [],
-            "class_summary": None,
-            "detected_class_tasks": [],
-        }
-
-    # Detener modo clase
-    if any(k in t for k in [
-        "deten modo clase", "detener modo clase",
-        "termina la clase", "terminar la clase",
-        "desactiva modo clase", "modo clase off",
-        "para la clase", "detén modo clase",
+        "desactiva modo clase",
+        "desactivar modo clase",
+        "deten modo clase",
+        "detener modo clase",
+        "termina modo clase",
+        "terminar modo clase",
+        "termina la clase",
+        "terminar la clase",
+        "finaliza modo clase",
+        "finalizar modo clase",
+        "para modo clase",
+        "para la clase",
+        "modo clase off",
+        "apaga modo clase",
+        "apagar modo clase",
     ]):
         result = cm.stop_class_session()
         return {
-            "response": result["message"],
-            "action_executed": result["ok"],
+            "response": result.get("message", "Modo clase desactivado."),
+            "action_executed": result.get("ok", False),
             "action_type": "class_mode",
             "class_mode_active": False,
             "class_file_path": result.get("file_path"),
@@ -497,17 +664,20 @@ def _handle_class_mode(text: str) -> dict:
 
     # Resumir clase
     if any(k in t for k in [
-        "resume la clase", "resumen de la clase",
-        "que se vio en clase", "que dijeron en clase",
+        "resume la clase",
+        "resumen de la clase",
+        "que se vio en clase",
+        "que dijeron en clase",
         "resume mis apuntes",
     ]):
         summary = cm.get_class_summary()
+        state = cm.get_class_state()
         return {
             "response": summary,
             "action_executed": True,
             "action_type": "class_mode",
-            "class_mode_active": cm.get_class_state()["active"],
-            "class_file_path": cm.get_class_state()["file_path"],
+            "class_mode_active": state["active"],
+            "class_file_path": state["file_path"],
             "class_notes": [],
             "class_summary": summary,
             "detected_class_tasks": [],
@@ -515,8 +685,10 @@ def _handle_class_mode(text: str) -> dict:
 
     # Tareas detectadas en clase
     if any(k in t for k in [
-        "que tareas dejo el profesor", "que tareas hay",
-        "tareas de la clase", "que tarea nos dejaron",
+        "que tareas dejo el profesor",
+        "que tareas hay",
+        "tareas de la clase",
+        "que tarea nos dejaron",
     ]):
         state = cm.get_class_state()
         return {
@@ -525,6 +697,28 @@ def _handle_class_mode(text: str) -> dict:
             "action_type": "class_mode",
             "class_mode_active": state["active"],
             "class_file_path": state["file_path"],
+            "class_notes": [],
+            "class_summary": None,
+            "detected_class_tasks": [],
+        }
+
+    # Activar modo clase DESPUÉS de detener
+    if any(k in t for k in [
+        "activa modo clase",
+        "activar modo clase",
+        "empieza modo clase",
+        "empieza a grabar la clase",
+        "graba la clase",
+        "inicia modo clase",
+        "modo clase on",
+    ]):
+        result = cm.start_class_session()
+        return {
+            "response": result.get("message", "Modo clase activado."),
+            "action_executed": result.get("ok", False),
+            "action_type": "class_mode",
+            "class_mode_active": result.get("ok", False),
+            "class_file_path": result.get("file_path"),
             "class_notes": [],
             "class_summary": None,
             "detected_class_tasks": [],
