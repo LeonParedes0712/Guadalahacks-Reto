@@ -6,92 +6,158 @@
   <title>Sentinel AI</title>
   <link rel="stylesheet" href="/static/style.css" />
 </head>
+<body class="mode-idle">
 
-<body>
+  <div class="app-shell">
 
-  <header class="hero">
-    <div>
-      <h1>Sentinel AI</h1>
-      <p>Private • Offline • Real-time</p>
-    </div>
+    <!-- ════════ SIDEBAR ════════ -->
+    <aside class="sidebar" id="sidebar">
 
-    <div>
-      <div class="badge">AI RUNNING LOCALLY</div>
-    </div>
-  </header>
-
-  <main class="dashboard">
-
-    <!-- Control principal -->
-    <section class="card control-card">
-      <h2>Voice Assistant</h2>
-      <p id="status">STANDBY</p>
-
-      <div id="wakeWordBadge" class="wake-badge wake-inactive">
-        WAKE WORD: NOT DETECTED
+      <div class="sidebar-header">
+        <div class="brand">
+          <span class="brand-mark">◆</span>
+          <span class="brand-name">Sentinel AI</span>
+        </div>
+        <p class="brand-tagline">Local voice assistant</p>
       </div>
 
-      <button id="recordBtn">🎙 Grabar audio</button>
+      <nav class="sidebar-nav">
+        <button class="nav-item nav-active" data-view="home">
+          <span class="nav-icon">✨</span>
+          <span class="nav-label">Nuevo comando</span>
+        </button>
 
-      <div class="tts-row">
-        <label class="tts-label">
-          <input type="checkbox" id="ttsToggle" checked />
-          Respuesta en voz alta (TTS)
-        </label>
+        <div class="nav-divider"></div>
+
+        <button class="nav-item" data-view="history">
+          <span class="nav-icon">🕓</span>
+          <span class="nav-label">Historial</span>
+        </button>
+
+        <button class="nav-item" data-view="notes">
+          <span class="nav-icon">📝</span>
+          <span class="nav-label">Notas</span>
+        </button>
+
+        <button class="nav-item" data-view="tasks">
+          <span class="nav-icon">✅</span>
+          <span class="nav-label">Tareas</span>
+        </button>
+
+        <button class="nav-item nav-emergency" data-view="emergency">
+          <span class="nav-icon">🚨</span>
+          <span class="nav-label">Emergencia</span>
+        </button>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="status-chip">
+          <span class="status-dot"></span>
+          <span>Running locally</span>
+        </div>
       </div>
-    </section>
+    </aside>
 
-    <!-- Transcripción -->
-    <section class="card">
-      <h2>Transcripción</h2>
-      <p id="transcriptText" class="mono-text">Esperando audio...</p>
-    </section>
+    <!-- ════════ MAIN ════════ -->
+    <main class="main">
 
-    <!-- Intent -->
-    <section class="card">
-      <h2>Intent detectado</h2>
-      <p id="intentText" class="intent-pill">Sin detectar</p>
+      <button class="sidebar-toggle" id="sidebarToggle" aria-label="Menu">☰</button>
 
-      <div class="confidence-container">
-        <div id="confidenceBar"></div>
-      </div>
+      <header class="main-header">
+        <h1 class="main-title">Sentinel AI</h1>
+        <p class="main-sub">Private · Offline · Real-time</p>
+      </header>
 
-      <p id="confidenceText">Confidence: 0%</p>
-    </section>
+      <!-- Panel central tipo recorder -->
+      <section class="recorder-panel">
 
-    <!-- Respuesta -->
-    <section class="card response-card">
-      <h2>Respuesta del sistema</h2>
-      <p id="responseText">Aquí aparecerá la respuesta contextual.</p>
-    </section>
+        <div class="recorder-status-row">
+          <div class="status-pill">
+            <span class="pulse-dot"></span>
+            <span id="status">STANDBY</span>
+          </div>
 
-    <!-- Emergencia -->
-    <section class="card emergency-card" id="emergencyCard">
-      <h2>🚨 Modo emergencia</h2>
-      <p id="emergencyText">Sin emergencia detectada.</p>
-    </section>
+          <div id="wakeWordBadge" class="wake-badge wake-inactive">
+            WAKE WORD: NOT DETECTED
+          </div>
+        </div>
 
-    <!-- Historial -->
-    <section class="card">
-      <h2>Historial</h2>
-      <ul id="historyList" class="item-list"></ul>
-    </section>
+        <button id="recordBtn" class="mic-btn" aria-label="Grabar audio">
+          <span class="mic-icon">🎙</span>
+          <span class="mic-ring"></span>
+        </button>
 
-    <!-- Notas -->
-    <section class="card notes-card">
-      <h2>📝 Notas</h2>
-      <p class="hint">Di "anota…" o "guarda…" para crear una nota.</p>
-      <ul id="notesList" class="item-list"></ul>
-    </section>
+        <p class="mic-hint">Toca el micrófono o di "Sentinel…"</p>
 
-    <!-- Tareas -->
-    <section class="card tasks-card">
-      <h2>✅ Tareas</h2>
-      <p class="hint">Di "tengo tarea…" o "quiero enfocarme en…" para agregar.</p>
-      <ul id="tasksList" class="item-list"></ul>
-    </section>
+        <div class="tts-row">
+          <label class="tts-label">
+            <input type="checkbox" id="ttsToggle" checked />
+            <span>Respuesta en voz alta (TTS)</span>
+          </label>
+        </div>
+      </section>
 
-  </main>
+      <!-- Cards contextuales: ocultas hasta que tengan contenido -->
+      <section class="cards-area">
+
+        <!-- Respuesta del sistema (con avatar slot) -->
+        <section class="card response-card auto-hide" data-card="response">
+          <div class="response-row">
+            <div class="avatar-slot" aria-hidden="true">
+              <div class="avatar-pixel">◉</div>
+            </div>
+            <div class="response-body">
+              <h2 class="card-title">Respuesta del sistema</h2>
+              <p id="responseText">Aquí aparecerá la respuesta contextual.</p>
+            </div>
+          </div>
+        </section>
+
+        <div class="cards-row">
+          <section class="card auto-hide" data-card="transcript">
+            <h2 class="card-title">Transcripción</h2>
+            <p id="transcriptText" class="mono-text">Esperando audio…</p>
+          </section>
+
+          <section class="card auto-hide" data-card="intent">
+            <h2 class="card-title">Intent detectado</h2>
+            <p id="intentText" class="intent-pill">Sin detectar</p>
+            <div class="confidence-container">
+              <div id="confidenceBar"></div>
+            </div>
+            <p id="confidenceText" class="confidence-text">Confidence: 0%</p>
+          </section>
+        </div>
+
+        <!-- Emergencia: oculta por defecto -->
+        <section class="card emergency-card auto-hide" id="emergencyCard" data-card="emergency">
+          <h2 class="card-title">🚨 Modo emergencia</h2>
+          <p id="emergencyText">Sin emergencia detectada.</p>
+        </section>
+
+        <!-- Historial -->
+        <section class="card auto-hide" data-card="history">
+          <h2 class="card-title">🕓 Historial</h2>
+          <ul id="historyList" class="item-list"></ul>
+        </section>
+
+        <!-- Notas -->
+        <section class="card notes-card auto-hide" data-card="notes">
+          <h2 class="card-title">📝 Notas</h2>
+          <p class="hint">Di "anota…" o "guarda…" para crear una nota.</p>
+          <ul id="notesList" class="item-list"></ul>
+        </section>
+
+        <!-- Tareas -->
+        <section class="card tasks-card auto-hide" data-card="tasks">
+          <h2 class="card-title">✅ Tareas</h2>
+          <p class="hint">Di "tengo tarea…" o "quiero enfocarme en…" para agregar.</p>
+          <ul id="tasksList" class="item-list"></ul>
+        </section>
+
+      </section>
+    </main>
+  </div>
 
   <script src="{{ url_for('static', filename='app.js') }}"></script>
 </body>
