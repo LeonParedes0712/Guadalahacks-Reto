@@ -1,4 +1,6 @@
 """
+actions.py
+──────────────────────────────────────────────
 Sentinel AI — Capa de acciones locales.
 
 Filosofía: local-first. Las funciones críticas NO dependen de internet ni
@@ -17,6 +19,9 @@ import webbrowser
 import unicodedata
 import urllib.parse
 from datetime import datetime
+
+import class_mode as cm
+import assistant_modes as modes
 
 
 # ──────────────────────────────────────────────
@@ -299,8 +304,23 @@ def _open_youtube_search(text: str) -> dict:
 # ══════════════════════════════════════════════
 def _handle_system(text: str) -> dict | None:
     """
-    Detecta qué app quiere abrir el usuario dentro del intent system.
+    Detecta qué app/página/carpeta quiere abrir el usuario dentro del intent system.
     """
+
+    # Búsquedas web y accesos rápidos se revisan primero.
+    search_result = modes.web_search(text)
+    if search_result is not None:
+        return search_result
+
+    web_result = modes.open_web_shortcut(text)
+    if web_result is not None:
+        return web_result
+
+    if _contains_any(text, ["descargas", "downloads", "documentos", "documents", "escritorio", "desktop", "apuntes"]):
+        return modes.handle_files(text)
+
+    if _contains_any(text, ["sube volumen", "baja volumen", "silencia", "mute", "play pause", "pausa musica", "siguiente cancion", "cancion anterior"]):
+        return modes.handle_media(text)
 
     if _contains_any(text, ["calculadora", "calculator", "calc"]):
         return _open_calculator()
@@ -433,6 +453,127 @@ def _handle_emotional(text: str) -> dict:
 
 
 # ══════════════════════════════════════════════
+# CLASS MODE
+# ══════════════════════════════════════════════
+def _handle_class_mode(text: str) -> dict:
+    t = _normalize(text)
+
+    # Activar modo clase
+    if any(k in t for k in [
+        "activa modo clase", "empieza modo clase",
+        "empieza a grabar la clase", "graba la clase",
+        "inicia modo clase", "modo clase on",
+    ]):
+        result = cm.start_class_session()
+        return {
+            "response": result["message"],
+            "action_executed": result["ok"],
+            "action_type": "class_mode",
+            "class_mode_active": result["ok"],
+            "class_file_path": result.get("file_path"),
+            "class_notes": [],
+            "class_summary": None,
+            "detected_class_tasks": [],
+        }
+
+    # Detener modo clase
+    if any(k in t for k in [
+        "deten modo clase", "detener modo clase",
+        "termina la clase", "terminar la clase",
+        "desactiva modo clase", "modo clase off",
+        "para la clase", "detén modo clase",
+    ]):
+        result = cm.stop_class_session()
+        return {
+            "response": result["message"],
+            "action_executed": result["ok"],
+            "action_type": "class_mode",
+            "class_mode_active": False,
+            "class_file_path": result.get("file_path"),
+            "class_notes": [],
+            "class_summary": None,
+            "detected_class_tasks": [],
+        }
+
+    # Resumir clase
+    if any(k in t for k in [
+        "resume la clase", "resumen de la clase",
+        "que se vio en clase", "que dijeron en clase",
+        "resume mis apuntes",
+    ]):
+        summary = cm.get_class_summary()
+        return {
+            "response": summary,
+            "action_executed": True,
+            "action_type": "class_mode",
+            "class_mode_active": cm.get_class_state()["active"],
+            "class_file_path": cm.get_class_state()["file_path"],
+            "class_notes": [],
+            "class_summary": summary,
+            "detected_class_tasks": [],
+        }
+
+    # Tareas detectadas en clase
+    if any(k in t for k in [
+        "que tareas dejo el profesor", "que tareas hay",
+        "tareas de la clase", "que tarea nos dejaron",
+    ]):
+        state = cm.get_class_state()
+        return {
+            "response": "Revisando tareas detectadas durante la clase. Consulta el panel de tareas.",
+            "action_executed": True,
+            "action_type": "class_mode",
+            "class_mode_active": state["active"],
+            "class_file_path": state["file_path"],
+            "class_notes": [],
+            "class_summary": None,
+            "detected_class_tasks": [],
+        }
+
+    # Genérico: estado actual
+    state = cm.get_class_state()
+    if state["active"]:
+        msg = f"Modo clase activo. Llevo {state['duration']} grabando."
+    else:
+        msg = "Modo clase inactivo. Di 'activa modo clase' para comenzar."
+
+    return {
+        "response": msg,
+        "action_executed": True,
+        "action_type": "class_mode",
+        "class_mode_active": state["active"],
+        "class_file_path": state["file_path"],
+        "class_notes": [],
+        "class_summary": None,
+        "detected_class_tasks": [],
+    }
+
+
+
+
+# ══════════════════════════════════════════════
+# FOCUS / PRESENTATION / MEDIA / FILES / ROUTINES
+# ══════════════════════════════════════════════
+def _handle_focus_mode(text: str) -> dict:
+    return modes.handle_focus_mode(text)
+
+
+def _handle_presentation_mode(text: str) -> dict:
+    return modes.handle_presentation_mode(text)
+
+
+def _handle_media(text: str) -> dict:
+    return modes.handle_media(text)
+
+
+def _handle_files(text: str) -> dict:
+    return modes.handle_files(text)
+
+
+def _handle_routine(text: str) -> dict:
+    return modes.handle_routine(text)
+
+# ══════════════════════════════════════════════
 # Función pública
 # ══════════════════════════════════════════════
 def execute_action(intent: str, text: str) -> dict | None:
@@ -470,6 +611,24 @@ def execute_action(intent: str, text: str) -> dict | None:
 
         if intent == "emotional":
             return _handle_emotional(text)
+
+        if intent == "class_mode":
+            return _handle_class_mode(text)
+
+        if intent == "focus_mode":
+            return _handle_focus_mode(text)
+
+        if intent == "presentation_mode":
+            return _handle_presentation_mode(text)
+
+        if intent == "media":
+            return _handle_media(text)
+
+        if intent == "files":
+            return _handle_files(text)
+
+        if intent == "routine":
+            return _handle_routine(text)
 
         # notes, productivity, general → app.py se encarga
         return None

@@ -16,12 +16,41 @@ const tasksList       = document.getElementById("tasksList");
 const wakeWordBadge   = document.getElementById("wakeWordBadge");
 const ttsToggle       = document.getElementById("ttsToggle");
 
+// Modo clase
+const classCard         = document.getElementById("classCard");
+const classStatusBadge  = document.getElementById("classStatusBadge");
+const classMeta         = document.getElementById("classMeta");
+const classDuration     = document.getElementById("classDuration");
+const classFragCount    = document.getElementById("classFragCount");
+const classSummaryBox   = document.getElementById("classSummaryBox");
+const classSummaryText  = document.getElementById("classSummaryText");
+const classFragments    = document.getElementById("classFragments");
+const classFragList     = document.getElementById("classFragList");
+const classFilePath     = document.getElementById("classFilePath");
+const classDotNav       = document.getElementById("classDotNav");
+
+// Modos nivel 2
+const focusCard               = document.getElementById("focusCard");
+const focusStatusBadge        = document.getElementById("focusStatusBadge");
+const focusTimerText          = document.getElementById("focusTimerText");
+const focusStateText          = document.getElementById("focusStateText");
+const focusDotNav             = document.getElementById("focusDotNav");
+const presentationCard        = document.getElementById("presentationCard");
+const presentationStatusBadge = document.getElementById("presentationStatusBadge");
+const presentationChecklist   = document.getElementById("presentationChecklist");
+const presentationDotNav      = document.getElementById("presentationDotNav");
+const filesCard               = document.getElementById("filesCard");
+const savedFilePath           = document.getElementById("savedFilePath");
+const mediaCard               = document.getElementById("mediaCard");
+const mediaStatusText         = document.getElementById("mediaStatusText");
+
 // ──────────────────────────────────────────────
 // Estado de grabación
 // ──────────────────────────────────────────────
 let mediaRecorder;
 let audioChunks = [];
 let isRecording = false;
+let classDurationInterval = null;
 
 // ──────────────────────────────────────────────
 // Helpers
@@ -40,6 +69,12 @@ const INTENT_COLORS = {
   fun:          "#f59e0b",
   notes:        "#10b981",
   general:      "#6b7280",
+  class_mode:   "#8b5cf6",
+  focus_mode:   "#2563eb",
+  presentation_mode: "#0f766e",
+  media:        "#f97316",
+  files:        "#0891b2",
+  routine:      "#7c3aed",
 };
 
 function speak(text) {
@@ -146,6 +181,12 @@ async function sendIntent(transcript) {
     updateDashboard(data);
     speak(data.response || "");
 
+    // Actualizar paneles de modos si hay info relevante
+    if (data.class_state) {
+      updateClassPanel(data.class_state, data.class_summary, data.class_file_path);
+    }
+    updateLevel2Panels(data);
+
     await Promise.all([loadHistory(), loadNotes(), loadTasks()]);
     setStatus("STANDBY");
   } catch (err) {
@@ -184,7 +225,8 @@ function updateDashboard(data) {
     emergencyText.textContent = "Sin emergencia detectada.";
     emergencyCard.classList.remove("emergency-active");
   }
-    // Mostrar cards principales después de una interacción
+
+  // Mostrar cards principales después de una interacción
   document.body.classList.remove("mode-idle");
   recorderPanel?.classList.remove("hidden");
 
@@ -204,7 +246,181 @@ function updateDashboard(data) {
   if (intent === "productivity") {
     showCard("tasks");
   }
+
+  // Modo clase: mostrar card si se activó o está activo
+  if (intent === "class_mode" || data.class_mode_active) {
+    showCard("class");
+  }
+
+  // Modos nivel 2
+  if (intent === "focus_mode" || data.focus_mode_active) {
+    showCard("focus");
+  }
+
+  if (intent === "presentation_mode" || data.presentation_mode_active) {
+    showCard("presentation");
+  }
+
+  if (intent === "media" || data.media_status) {
+    showCard("media");
+  }
+
+  if (intent === "files" || data.saved_file_path) {
+    showCard("files");
+  }
+
+  updateLevel2Panels(data);
 }
+
+// ──────────────────────────────────────────────
+// Modo Clase — actualizar panel
+// ──────────────────────────────────────────────
+function updateClassPanel(state, summary, filePath) {
+  if (!state) return;
+
+  const active = state.active;
+
+  // Badge de estado
+  classStatusBadge.textContent = active ? "ACTIVO" : "INACTIVO";
+  classStatusBadge.className = "class-status-badge " + (active ? "class-badge-active" : "class-badge-inactive");
+
+  // Punto de actividad en sidebar nav
+  if (active) {
+    classDotNav.classList.remove("hidden");
+  } else {
+    classDotNav.classList.add("hidden");
+  }
+
+  // Resaltar nav item de clase si está activo
+  const classNavItem = document.querySelector('[data-view="class"]');
+  if (classNavItem) {
+    classNavItem.classList.toggle("class-nav-active", active);
+  }
+
+  // Metadatos
+  if (active) {
+    classMeta.style.display = "flex";
+    classDuration.textContent = state.duration || "00:00";
+    classFragCount.textContent = state.fragments_total || 0;
+  } else {
+    classMeta.style.display = "none";
+  }
+
+  // Fragmentos recientes
+  const frags = state.fragments || [];
+  if (frags.length > 0) {
+    classFragments.classList.remove("hidden");
+    classFragList.innerHTML = "";
+    frags.slice().reverse().forEach(f => {
+      const li = document.createElement("li");
+      li.innerHTML = `<span class="ts">${f.timestamp}</span> <span class="item-text">${f.text}</span>`;
+      classFragList.appendChild(li);
+    });
+  } else {
+    classFragments.classList.add("hidden");
+  }
+
+  // Resumen
+  if (summary) {
+    classSummaryBox.classList.remove("hidden");
+    classSummaryText.textContent = summary;
+  } else {
+    classSummaryBox.classList.add("hidden");
+  }
+
+  // Ruta del archivo
+  if (filePath) {
+    classFilePath.classList.remove("hidden");
+    classFilePath.textContent = "📁 " + filePath;
+  } else if (state.file_path) {
+    classFilePath.classList.remove("hidden");
+    classFilePath.textContent = "📁 " + state.file_path;
+  } else {
+    classFilePath.classList.add("hidden");
+  }
+}
+
+// ──────────────────────────────────────────────
+// Modos Nivel 2 — actualizar paneles
+// ──────────────────────────────────────────────
+function updateLevel2Panels(data = {}) {
+  // Focus / Pomodoro
+  const focusState = data.focus_timer || data.modes_state?.focus || null;
+  const focusActive = data.focus_mode_active || focusState?.active || false;
+
+  if (focusStatusBadge) {
+    focusStatusBadge.textContent = focusActive ? "ACTIVO" : "INACTIVO";
+    focusStatusBadge.className = "class-status-badge " + (focusActive ? "class-badge-active" : "class-badge-inactive");
+  }
+
+  if (focusDotNav) focusDotNav.classList.toggle("hidden", !focusActive);
+
+  if (focusState) {
+    if (focusTimerText) {
+      if (focusState.timer_type) {
+        const label = focusState.timer_type === "break" ? "Descanso" : "Pomodoro";
+        focusTimerText.textContent = `${label}: ${focusState.timer_remaining || "00:00"}`;
+      } else {
+        focusTimerText.textContent = focusActive ? "Sin temporizador activo" : "Inactivo";
+      }
+    }
+    if (focusStateText) {
+      focusStateText.textContent = focusActive ? "Enfoque activo" : "Listo";
+    }
+  }
+
+  // Presentación / demo
+  const presentationActive = data.presentation_mode_active || data.modes_state?.presentation?.active || false;
+  if (presentationStatusBadge) {
+    presentationStatusBadge.textContent = presentationActive ? "ACTIVO" : "INACTIVO";
+    presentationStatusBadge.className = "class-status-badge " + (presentationActive ? "class-badge-active" : "class-badge-inactive");
+  }
+  if (presentationDotNav) presentationDotNav.classList.toggle("hidden", !presentationActive);
+
+  const checklist = data.presentation_checklist || data.modes_state?.presentation?.checklist || [];
+  if (presentationChecklist && checklist.length > 0) {
+    presentationChecklist.innerHTML = "";
+    checklist.forEach(item => {
+      const li = document.createElement("li");
+      li.innerHTML = `<span class="done-label">✓</span><span class="item-text">${item}</span>`;
+      presentationChecklist.appendChild(li);
+    });
+  }
+
+  // Multimedia
+  if (data.media_status && mediaStatusText) {
+    mediaStatusText.textContent = data.media_status;
+  }
+
+  // Archivos
+  if (data.saved_file_path && savedFilePath) {
+    savedFilePath.classList.remove("hidden");
+    savedFilePath.textContent = "📁 " + data.saved_file_path;
+  }
+}
+
+async function pollModesState() {
+  try {
+    const res = await fetch("/modes/state");
+    const state = await res.json();
+    updateLevel2Panels({ modes_state: state });
+  } catch (_) {}
+}
+
+setInterval(pollModesState, 10000);
+
+// Polling del estado de clase (cada 10 seg si está activo)
+async function pollClassState() {
+  try {
+    const res = await fetch("/class/state");
+    const state = await res.json();
+    if (state.active) {
+      updateClassPanel(state, null, null);
+    }
+  } catch (_) {}
+}
+
+setInterval(pollClassState, 10000);
 
 // ──────────────────────────────────────────────
 // Historial
@@ -265,8 +481,12 @@ async function loadTasks() {
     data.tasks.forEach((task, i) => {
       const li = document.createElement("li");
       li.className = task.done ? "task-done" : "";
+      const sourceTag = task.source === "class_mode"
+        ? `<span class="class-task-tag">🎓 clase</span>`
+        : "";
       li.innerHTML = `
         <span class="ts">${task.timestamp}</span>
+        ${sourceTag}
         <span class="item-text">${task.text}</span>
         ${!task.done
           ? `<button class="done-btn" onclick="markDone(${i})">✓</button>`
@@ -287,6 +507,20 @@ async function markDone(index) {
 loadHistory();
 loadNotes();
 loadTasks();
+
+// Cargar estado inicial de clase
+fetch("/class/state").then(r => r.json()).then(state => {
+  if (state.active) {
+    updateClassPanel(state, null, null);
+    showCard("class");
+  }
+}).catch(() => {});
+
+fetch("/modes/state").then(r => r.json()).then(state => {
+  updateLevel2Panels({ modes_state: state });
+  if (state.focus?.active) showCard("focus");
+  if (state.presentation?.active) showCard("presentation");
+}).catch(() => {});
 
 // ──────────────────────────────────────────────
 // Sidebar / vistas dinámicas
@@ -351,6 +585,32 @@ function showView(view) {
 
   if (view === "emergency") {
     showCard("emergency");
+  }
+
+  if (view === "class") {
+    showCard("class");
+    // Actualizar estado al navegar
+    fetch("/class/state").then(r => r.json()).then(state => {
+      updateClassPanel(state, null, null);
+    }).catch(() => {});
+  }
+
+  if (view === "focus") {
+    showCard("focus");
+    pollModesState();
+  }
+
+  if (view === "presentation") {
+    showCard("presentation");
+    pollModesState();
+  }
+
+  if (view === "files") {
+    showCard("files");
+  }
+
+  if (view === "media") {
+    showCard("media");
   }
 }
 
