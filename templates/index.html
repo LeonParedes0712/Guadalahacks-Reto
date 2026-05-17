@@ -7,6 +7,7 @@
   <link rel="stylesheet" href="/static/style.css" />
 </head>
 <body>
+
   <header class="hero">
     <div class="badge">AI RUNNING LOCALLY</div>
     <h1>Sentinel AI</h1>
@@ -14,44 +15,76 @@
   </header>
 
   <main class="dashboard">
+
+    <!-- Control principal -->
     <section class="card control-card">
       <h2>Voice Assistant</h2>
       <p id="status">STANDBY</p>
-      <button id="recordBtn">Grabar audio</button>
+
+      <div id="wakeWordBadge" class="wake-badge wake-inactive">
+        WAKE WORD: NOT DETECTED
+      </div>
+
+      <button id="recordBtn">🎙 Grabar audio</button>
+
+      <div class="tts-row">
+        <label class="tts-label">
+          <input type="checkbox" id="ttsToggle" checked />
+          Respuesta en voz alta (TTS)
+        </label>
+      </div>
     </section>
 
+    <!-- Transcripción -->
     <section class="card">
       <h2>Transcripción</h2>
-      <p id="transcriptText">Esperando audio...</p>
+      <p id="transcriptText" class="mono-text">Esperando audio...</p>
     </section>
 
+    <!-- Intent -->
     <section class="card">
       <h2>Intent detectado</h2>
-      <p id="intentText">Sin detectar</p>
+      <p id="intentText" class="intent-pill">Sin detectar</p>
       <div class="confidence-container">
         <div id="confidenceBar"></div>
       </div>
       <p id="confidenceText">Confidence: 0%</p>
     </section>
 
+    <!-- Respuesta -->
     <section class="card response-card">
       <h2>Respuesta del sistema</h2>
       <p id="responseText">Aquí aparecerá la respuesta contextual.</p>
     </section>
 
-    <section class="card emergency-card">
-      <h2>Modo emergencia</h2>
+    <!-- Emergencia -->
+    <section class="card emergency-card" id="emergencyCard">
+      <h2>🚨 Modo emergencia</h2>
       <p id="emergencyText">Sin emergencia detectada.</p>
     </section>
 
+    <!-- Historial -->
     <section class="card">
       <h2>Historial</h2>
-      <ul id="historyList"></ul>
+      <ul id="historyList" class="item-list"></ul>
     </section>
+
+    <!-- Notas -->
+    <section class="card notes-card">
+      <h2>📝 Notas</h2>
+      <p class="hint">Di "anota…" o "guarda…" para crear una nota.</p>
+      <ul id="notesList" class="item-list"></ul>
+    </section>
+
+    <!-- Tareas -->
+    <section class="card tasks-card">
+      <h2>✅ Tareas</h2>
+      <p class="hint">Di "tengo tarea…" o "quiero enfocarme en…" para agregar.</p>
+      <ul id="tasksList" class="item-list"></ul>
+    </section>
+
   </main>
 
   <script src="{{ url_for('static', filename='app.js') }}"></script>
-
-
 </body>
 </html>
