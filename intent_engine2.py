@@ -91,12 +91,123 @@ def _has_emergency_keyword(text: str) -> bool:
 
     return False
 
+
+# ──────────────────────────────────────────────
+# Palabras clave de modo clase (para detección rápida)
+# ──────────────────────────────────────────────
+_CLASS_MODE_KEYWORDS = [
+    "modo clase",
+    "grabar la clase",
+    "graba la clase",
+    "empieza a grabar",
+    "activa modo clase",
+    "empieza modo clase",
+    "deten modo clase",
+    "detener modo clase",
+    "termina la clase",
+    "terminar la clase",
+    "resume la clase",
+    "resumen de la clase",
+    "que tareas dejo el profesor",
+    "que tareas hay de clase",
+    "tareas de la clase",
+    "desactiva modo clase",
+    "inicia modo clase",
+    "guarda esta explicacion",
+    "guarda esta explicación",
+]
+
+
+def _has_class_mode_keyword(text: str) -> bool:
+    t = _normalize(text)
+    return any(_normalize(k) in t for k in _CLASS_MODE_KEYWORDS)
+
+
+# ──────────────────────────────────────────────
+# Palabras clave Nivel 2
+# ──────────────────────────────────────────────
+_FOCUS_MODE_KEYWORDS = [
+    "modo enfoque", "modo estudiar", "modo programar", "empieza pomodoro",
+    "inicia pomodoro", "activa modo enfoque", "necesito enfocarme",
+    "quiero enfocarme", "descanso de cinco minutos", "termina modo enfoque",
+    "cuanto falta del pomodoro", "termina pomodoro", "pausa enfoque",
+]
+
+_PRESENTATION_MODE_KEYWORDS = [
+    "modo presentacion", "modo presentación", "modo demo", "prepara demo",
+    "activa modo presentacion", "activa modo presentación", "abre la app",
+    "abre github", "prepara la demo", "termina modo demo",
+]
+
+_MEDIA_KEYWORDS = [
+    "sube volumen", "baja volumen", "silencia", "mute",
+    "pausa musica", "pausa música", "reproduce musica", "reproduce música",
+    "play pause", "siguiente cancion", "siguiente canción",
+    "cancion anterior", "canción anterior",
+]
+
+_FILES_KEYWORDS = [
+    "abre descargas", "abre documentos", "abre escritorio", "abre carpeta de apuntes",
+    "abre mis apuntes", "crea una carpeta para la clase",
+    "guarda esto como archivo", "guarda esta nota como archivo",
+]
+
+_ROUTINE_KEYWORDS = [
+    "modo descanso", "modo estudiar", "modo programar", "modo demo",
+    "prepara demo", "rutina estudiar", "rutina programar",
+]
+
+_WEB_SEARCH_KEYWORDS = [
+    "busca", "buscar", "buscame", "búscame", "investiga"
+]
+
+_WEB_SHORTCUT_KEYWORDS = [
+    "abre gmail", "abre correo", "abre drive", "abre google drive",
+    "abre calendario", "abre google calendar", "abre github", "abre chatgpt",
+    "abre claude", "abre google", "abre youtube"
+]
+
+
+def _has_any_keyword(text: str, keywords: list[str]) -> bool:
+    t = _normalize(text)
+    return any(_normalize(k) in t for k in keywords)
+
+
 def _rule_based_intent(text: str):
     """
     Reglas directas para comandos muy claros.
     Esto mejora frases largas o naturales que el modelo puede clasificar con baja confianza.
     """
     t = _normalize(text)
+
+    # CLASS MODE: tiene prioridad sobre otras reglas (excepto emergencia)
+    if _has_class_mode_keyword(text):
+        return "class_mode", 0.97
+
+    # Nivel 2: reglas directas para comandos de asistente
+    if _has_any_keyword(text, _PRESENTATION_MODE_KEYWORDS):
+        return "presentation_mode", 0.96
+
+    # Rutinas compuestas antes que productividad general
+    if _has_any_keyword(text, _ROUTINE_KEYWORDS):
+        # modo estudiar/programar pueden mapear a focus directamente, excepto demo/descanso
+        if _has_any_keyword(text, ["modo demo", "prepara demo"]):
+            return "presentation_mode", 0.96
+        if _has_any_keyword(text, ["modo descanso"]):
+            return "routine", 0.94
+        return "focus_mode", 0.96
+
+    if _has_any_keyword(text, _FOCUS_MODE_KEYWORDS):
+        return "focus_mode", 0.96
+
+    if _has_any_keyword(text, _MEDIA_KEYWORDS):
+        return "media", 0.96
+
+    if _has_any_keyword(text, _FILES_KEYWORDS):
+        return "files", 0.96
+
+    if _has_any_keyword(text, _WEB_SEARCH_KEYWORDS) or _has_any_keyword(text, _WEB_SHORTCUT_KEYWORDS):
+        return "system", 0.94
 
     # NOTAS: comandos explícitos de guardar información
     note_starters = [
@@ -420,6 +531,38 @@ _TRAINING = [
     ("escribe la direccion", "notes"),
     ("recuerda este dato", "notes"),
 
+
+    # FOCUS MODE
+    ("activa modo enfoque", "focus_mode"),
+    ("modo estudiar", "focus_mode"),
+    ("modo programar", "focus_mode"),
+    ("empieza pomodoro", "focus_mode"),
+    ("inicia pomodoro", "focus_mode"),
+    ("cuanto falta del pomodoro", "focus_mode"),
+    ("termina pomodoro", "focus_mode"),
+    ("descanso de cinco minutos", "focus_mode"),
+
+    # PRESENTATION MODE
+    ("activa modo presentacion", "presentation_mode"),
+    ("modo demo", "presentation_mode"),
+    ("prepara demo", "presentation_mode"),
+    ("abre la app", "presentation_mode"),
+
+    # MEDIA
+    ("sube volumen", "media"),
+    ("baja volumen", "media"),
+    ("silencia", "media"),
+    ("pausa musica", "media"),
+    ("siguiente cancion", "media"),
+    ("cancion anterior", "media"),
+
+    # FILES
+    ("abre descargas", "files"),
+    ("abre documentos", "files"),
+    ("abre escritorio", "files"),
+    ("abre carpeta de apuntes", "files"),
+    ("guarda esto como archivo", "files"),
+
     # GENERAL
     ("hola", "general"),
     ("como estas", "general"),
@@ -444,6 +587,29 @@ _TRAINING = [
     ("ok sentinel", "general"),
     ("sentinel aqui estoy", "general"),
     ("habla conmigo", "general"),
+
+    # CLASS MODE
+    ("activa modo clase", "class_mode"),
+    ("empieza modo clase", "class_mode"),
+    ("empieza a grabar la clase", "class_mode"),
+    ("graba la clase", "class_mode"),
+    ("inicia el modo clase", "class_mode"),
+    ("deten modo clase", "class_mode"),
+    ("termina la clase", "class_mode"),
+    ("terminar la clase ahora", "class_mode"),
+    ("desactiva modo clase", "class_mode"),
+    ("resume la clase", "class_mode"),
+    ("resumen de la clase", "class_mode"),
+    ("que tareas dejo el profesor", "class_mode"),
+    ("que tareas hay de clase", "class_mode"),
+    ("tareas de la clase de hoy", "class_mode"),
+    ("guarda esta explicacion", "class_mode"),
+    ("modo clase activado", "class_mode"),
+    ("quiero grabar la clase", "class_mode"),
+    ("sentinel activa modo clase", "class_mode"),
+    ("sentinel graba la clase", "class_mode"),
+    ("sentinel termina la clase", "class_mode"),
+    ("sentinel resume la clase", "class_mode"),
 ]
 
 # ──────────────────────────────────────────────
@@ -473,7 +639,8 @@ def classify(text: str) -> tuple[str, float]:
 
     Intents posibles:
         emergency, music, productivity, emotional,
-        system, time, fun, notes, general
+        system, time, fun, notes, general, class_mode,
+        focus_mode, presentation_mode, media, files, routine
     """
     if not text or text.strip() == "":
         return "general", 0.0
@@ -482,7 +649,7 @@ def classify(text: str) -> tuple[str, float]:
     if _has_emergency_keyword(text):
         return "emergency", 0.99
 
-    # Reglas directas para comandos claros
+    # Reglas directas para comandos claros (incluye class_mode)
     rule_result = _rule_based_intent(text)
     if rule_result is not None:
         return rule_result

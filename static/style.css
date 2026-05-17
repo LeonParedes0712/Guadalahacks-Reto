@@ -23,6 +23,8 @@
   --c-green-soft:   #dcfce7;
   --c-red:          #dc2626;
   --c-red-soft:     #fef2f2;
+  --c-purple:       #7c3aed;
+  --c-purple-soft:  #ede9fe;
 
   --r-sm: 10px;
   --r-md: 14px;
@@ -298,7 +300,7 @@ body.mode-active .recorder-panel {
   letter-spacing: 1px;
 }
 
-#status { /* mantiene id, ahora estilizado discreto */
+#status {
   font-weight: 600;
   color: var(--c-blue-dark);
   font-size: 12px;
@@ -311,10 +313,6 @@ body.mode-active .recorder-panel {
   border-radius: 50%;
   background: var(--c-blue-primary);
 }
-
-/* el JS solo cambia el texto de #status; estos selectores
-   detectan listening/processing por content de #status */
-.status-pill:has(#status:not(:empty)) .pulse-dot { /* default */ }
 
 .wake-badge {
   padding: 5px 12px;
@@ -350,7 +348,7 @@ body.mode-active .recorder-panel {
   place-items: center;
   box-shadow: 0 10px 30px rgba(37, 99, 235, 0.4);
   transition: transform 0.15s ease, box-shadow 0.2s ease, width 0.3s, height 0.3s;
-  font-size: 0; /* ocultar cualquier texto del JS legacy */
+  font-size: 0;
 }
 
 .mic-btn:hover {
@@ -374,22 +372,14 @@ body.mode-active .recorder-panel {
   pointer-events: none;
 }
 
-/* Cuando el JS legacy cambia el textContent del botón a "⏹ Detener…",
-   el botón ya no contiene .mic-icon — usamos eso para detectar recording */
 .mic-btn:not(:has(.mic-icon)) {
   background: linear-gradient(180deg, #ef4444 0%, #b91c1c 100%);
-  box-shadow: 0 10px 30px rgba(239, 68, 68, 0.5);
-  font-size: 24px; /* mostrar texto del legacy si lo cambian */
-}
-
-.mic-btn:not(:has(.mic-icon)) .mic-ring {
-  opacity: 1;
-  animation: ring-pulse 1.4s infinite;
-}
-
-@keyframes ring-pulse {
-  0%   { transform: scale(1);    opacity: 0.7; }
-  100% { transform: scale(1.35); opacity: 0;   }
+  box-shadow: 0 10px 30px rgba(239, 68, 68, 0.4);
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  width: 160px;
+  border-radius: 40px;
 }
 
 body.mode-active .mic-btn { width: 92px; height: 92px; }
@@ -768,4 +758,232 @@ body.mode-idle .cards-row { display: none; }
 
 .sidebar.sidebar-open {
   transform: translateX(0);
+}
+
+/* ══════════════════════════════════════════════
+   MODO CLASE — estilos nuevos
+   ══════════════════════════════════════════════ */
+
+/* Card de clase */
+.class-card {
+  border-color: #c4b5fd;
+  background: #faf5ff;
+}
+
+/* Header row con badge */
+.class-header-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.class-header-row .card-title {
+  margin: 0;
+}
+
+/* Badge ACTIVO / INACTIVO */
+.class-status-badge {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  padding: 3px 10px;
+  border-radius: 999px;
+  text-transform: uppercase;
+}
+
+.class-badge-active {
+  background: #d1fae5;
+  color: #065f46;
+  border: 1px solid #6ee7b7;
+  animation: pulse-class 2s infinite;
+}
+
+.class-badge-inactive {
+  background: var(--c-card);
+  color: var(--c-text-muted);
+  border: 1px solid var(--c-border);
+}
+
+@keyframes pulse-class {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.3); }
+  50%      { box-shadow: 0 0 8px 3px rgba(16, 185, 129, 0.15); }
+}
+
+/* Metadatos de duración y fragmentos */
+.class-meta {
+  display: flex;
+  gap: 16px;
+  margin: 8px 0 12px;
+  flex-wrap: wrap;
+}
+
+.class-meta-item {
+  font-size: 12px;
+  color: var(--c-text-soft);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* Resumen */
+.class-summary-box {
+  background: var(--c-white);
+  border: 1px solid #c4b5fd;
+  border-radius: var(--r-sm);
+  padding: 12px 14px;
+  margin-bottom: 12px;
+}
+
+.class-summary-title {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--c-purple);
+  margin: 0 0 6px;
+}
+
+#classSummaryText {
+  font-size: 13px;
+  color: var(--c-text);
+  line-height: 1.5;
+  margin: 0;
+}
+
+/* Fragmentos recientes */
+.class-frag-title {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--c-text-muted);
+  margin: 0 0 8px;
+}
+
+.class-fragments {
+  margin-top: 4px;
+}
+
+/* Ruta del archivo */
+.class-file-path {
+  font-size: 11px;
+  color: var(--c-text-muted);
+  font-family: 'Courier New', monospace;
+  margin: 10px 0 0;
+  word-break: break-all;
+}
+
+/* Punto de actividad en sidebar nav */
+.class-dot {
+  width: 8px;
+  height: 8px;
+  background: #10b981;
+  border-radius: 50%;
+  margin-left: auto;
+  box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.3);
+  animation: pulse-class 2s infinite;
+}
+
+/* Nav item de clase activa */
+.nav-class.class-nav-active {
+  background: var(--c-purple-soft);
+  color: var(--c-purple);
+}
+
+/* Tag de tarea de clase en lista de tareas */
+.class-task-tag {
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: var(--c-purple-soft);
+  color: var(--c-purple);
+  white-space: nowrap;
+}
+/* ══════════════════════════════════════════════
+   MODOS NIVEL 2 — enfoque, demo, archivos, media
+   ══════════════════════════════════════════════ */
+.mode-dot {
+  width: 8px;
+  height: 8px;
+  background: var(--c-green);
+  border-radius: 50%;
+  margin-left: auto;
+  box-shadow: 0 0 0 2px rgba(22, 163, 74, 0.22);
+  animation: pulse-class 2s infinite;
+}
+
+.focus-card {
+  border-color: #93c5fd;
+  background: #eff6ff;
+}
+
+.presentation-card {
+  border-color: #99f6e4;
+  background: #f0fdfa;
+}
+
+.files-card {
+  border-color: #bae6fd;
+  background: #f0f9ff;
+}
+
+.media-card {
+  border-color: #fed7aa;
+  background: #fff7ed;
+}
+
+.mode-info-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.mode-info-grid > div {
+  background: var(--c-white);
+  border: 1px solid var(--c-border);
+  border-radius: var(--r-sm);
+  padding: 12px 14px;
+}
+
+.mode-label {
+  display: block;
+  color: var(--c-text-muted);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  margin-bottom: 4px;
+}
+
+.mode-info-grid strong {
+  color: var(--c-blue-dark);
+  font-size: 14px;
+}
+
+.nav-focus.class-nav-active,
+.nav-focus.mode-nav-active {
+  background: #dbeafe;
+  color: #1d4ed8;
+}
+
+.nav-presentation.class-nav-active,
+.nav-presentation.mode-nav-active {
+  background: #ccfbf1;
+  color: #0f766e;
+}
+
+#mediaStatusText {
+  margin: 0;
+  color: var(--c-text);
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+@media (max-width: 700px) {
+  .mode-info-grid {
+    grid-template-columns: 1fr;
+  }
 }

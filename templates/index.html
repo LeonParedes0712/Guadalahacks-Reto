@@ -44,6 +44,35 @@
           <span class="nav-label">Tareas</span>
         </button>
 
+        <!-- Modos nivel 2 -->
+        <button class="nav-item nav-class" data-view="class">
+          <span class="nav-icon">🎓</span>
+          <span class="nav-label">Clase</span>
+          <span class="class-dot hidden" id="classDotNav"></span>
+        </button>
+
+        <button class="nav-item nav-focus" data-view="focus">
+          <span class="nav-icon">🎯</span>
+          <span class="nav-label">Enfoque</span>
+          <span class="mode-dot hidden" id="focusDotNav"></span>
+        </button>
+
+        <button class="nav-item nav-presentation" data-view="presentation">
+          <span class="nav-icon">🖥️</span>
+          <span class="nav-label">Demo</span>
+          <span class="mode-dot hidden" id="presentationDotNav"></span>
+        </button>
+
+        <button class="nav-item" data-view="files">
+          <span class="nav-icon">📁</span>
+          <span class="nav-label">Archivos</span>
+        </button>
+
+        <button class="nav-item" data-view="media">
+          <span class="nav-icon">🎚️</span>
+          <span class="nav-label">Multimedia</span>
+        </button>
+
         <button class="nav-item nav-emergency" data-view="emergency">
           <span class="nav-icon">🚨</span>
           <span class="nav-label">Emergencia</span>
@@ -133,6 +162,71 @@
         <section class="card emergency-card auto-hide" id="emergencyCard" data-card="emergency">
           <h2 class="card-title">🚨 Modo emergencia</h2>
           <p id="emergencyText">Sin emergencia detectada.</p>
+        </section>
+
+        <!-- Modo Clase: oculta por defecto, aparece cuando está activo o cuando se navega -->
+        <section class="card class-card auto-hide" id="classCard" data-card="class">
+          <div class="class-header-row">
+            <h2 class="card-title">🎓 Modo Clase</h2>
+            <span class="class-status-badge" id="classStatusBadge">INACTIVO</span>
+          </div>
+          <p class="hint">Di "activa modo clase" para comenzar a grabar tus apuntes automáticamente.</p>
+          <div class="class-meta" id="classMeta" style="display:none">
+            <span class="class-meta-item">⏱ <span id="classDuration">00:00</span></span>
+            <span class="class-meta-item">📄 <span id="classFragCount">0</span> fragmentos</span>
+          </div>
+          <div class="class-summary-box hidden" id="classSummaryBox">
+            <h3 class="class-summary-title">Resumen</h3>
+            <p id="classSummaryText"></p>
+          </div>
+          <div class="class-fragments hidden" id="classFragments">
+            <h3 class="class-frag-title">Últimos apuntes</h3>
+            <ul id="classFragList" class="item-list"></ul>
+          </div>
+          <p class="class-file-path hidden" id="classFilePath"></p>
+        </section>
+
+
+        <!-- Modo Enfoque -->
+        <section class="card focus-card auto-hide" id="focusCard" data-card="focus">
+          <div class="class-header-row">
+            <h2 class="card-title">🎯 Modo Enfoque</h2>
+            <span class="class-status-badge class-badge-inactive" id="focusStatusBadge">INACTIVO</span>
+          </div>
+          <p class="hint">Di "modo estudiar", "modo programar" o "empieza pomodoro".</p>
+          <div class="mode-info-grid">
+            <div>
+              <span class="mode-label">Temporizador</span>
+              <strong id="focusTimerText">Sin temporizador activo</strong>
+            </div>
+            <div>
+              <span class="mode-label">Estado</span>
+              <strong id="focusStateText">Listo</strong>
+            </div>
+          </div>
+        </section>
+
+        <!-- Modo Presentación -->
+        <section class="card presentation-card auto-hide" id="presentationCard" data-card="presentation">
+          <div class="class-header-row">
+            <h2 class="card-title">🖥️ Modo Presentación</h2>
+            <span class="class-status-badge class-badge-inactive" id="presentationStatusBadge">INACTIVO</span>
+          </div>
+          <p class="hint">Di "modo demo" o "prepara demo" para abrir lo necesario y mostrar checklist.</p>
+          <ul id="presentationChecklist" class="item-list"></ul>
+        </section>
+
+        <!-- Archivos -->
+        <section class="card files-card auto-hide" id="filesCard" data-card="files">
+          <h2 class="card-title">📁 Archivos</h2>
+          <p class="hint">Puedes abrir Descargas, Documentos, Escritorio, apuntes o guardar notas como archivo.</p>
+          <p id="savedFilePath" class="class-file-path hidden"></p>
+        </section>
+
+        <!-- Multimedia -->
+        <section class="card media-card auto-hide" id="mediaCard" data-card="media">
+          <h2 class="card-title">🎚️ Multimedia</h2>
+          <p id="mediaStatusText">Sin acción multimedia reciente.</p>
         </section>
 
         <!-- Historial -->
