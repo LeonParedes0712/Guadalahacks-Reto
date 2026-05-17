@@ -134,10 +134,19 @@ _FOCUS_MODE_KEYWORDS = [
 ]
 
 _PRESENTATION_MODE_KEYWORDS = [
-    "modo presentacion", "modo presentación", "modo demo", "prepara demo",
-    "activa modo presentacion", "activa modo presentación", "abre la app",
-    "abre github", "prepara la demo", "termina modo demo",
+    "modo presentacion",
+    "modo presentación",
+    "modo demo",
+    "prepara demo",
+    "prepara la demo",
+    "activa modo presentacion",
+    "activa modo presentación",
+    "abre la app",
+    "abre sentinel",
+    "abre la demo",
+    "termina modo demo",
 ]
+
 
 _MEDIA_KEYWORDS = [
     "sube volumen", "baja volumen", "silencia", "mute",
@@ -163,8 +172,205 @@ _WEB_SEARCH_KEYWORDS = [
 
 _WEB_SHORTCUT_KEYWORDS = [
     "abre gmail", "abre correo", "abre drive", "abre google drive",
-    "abre calendario", "abre google calendar", "abre github", "abre chatgpt",
-    "abre claude", "abre google", "abre youtube"
+    "abre calendario", "abre google calendar",
+
+    # GitHub normal + errores comunes de transcripción
+    "abre github", "abrir github", "github", "git hub", "guit hub",
+    "githab", "gitjab", "kit hub", "kithub", "kid hu", "kidhu",
+    "kitho", "vit hub", "vithub", "vitzhub", "gijub",
+
+    # ChatGPT normal + errores comunes de transcripción
+    "abre chatgpt", "abrir chatgpt", "chatgpt", "chat gpt",
+    "chat g p t", "chet gpt", "chetpiti", "chetipiti",
+    "cheetum", "chit gpt", "chad gpt",
+
+    # Claude
+    "abre claude", "abrir claude", "claude", "clod", "cloud",
+
+    "abre google", "abre youtube"
+]
+
+
+_SYSTEM_KEYWORDS = [
+    # calculadora
+    "abre calculadora",
+    "abre la calculadora",
+    "abrir calculadora",
+    "abrir la calculadora",
+    "calculadora",
+    "calculator",
+    "calculador",
+    "calc",
+
+    # notas / editores
+    "abre bloc de notas",
+    "abre el bloc de notas",
+    "abrir bloc de notas",
+    "bloc de notas",
+    "notepad",
+    "notepads",
+    "nota pad",
+    "notas de windows",
+    "textedit",
+    "editor de texto",
+
+    # archivos / explorer / finder
+    "abre explorador",
+    "abre el explorador",
+    "abre explorador de archivos",
+    "abre el explorador de archivos",
+    "abrir explorador",
+    "explorador",
+    "explorador de archivos",
+    "abre archivos",
+    "abrir archivos",
+    "file explorer",
+    "finder",
+
+    # vscode
+    "abre vs code",
+    "abrir vs code",
+    "vs code",
+    "visual studio code",
+    "vscode",
+
+    # spotify
+    "abre spotify",
+    "abrir spotify",
+    "spotify",
+
+    # office
+    "abre excel",
+    "abre microsoft excel",
+    "abrir excel",
+    "excel",
+    "hoja de calculo",
+    "hoja de cálculo",
+
+    "abre word",
+    "abre microsoft word",
+    "abrir word",
+    "word",
+    "documento de word",
+
+    "abre powerpoint",
+    "abre power point",
+    "abre microsoft powerpoint",
+    "abrir powerpoint",
+    "powerpoint",
+    "power point",
+    "presentacion",
+    "presentación",
+    "diapositivas",
+
+    "abre outlook",
+    "abrir outlook",
+    "outlook",
+    "correo de outlook",
+
+    "abre teams",
+    "abrir teams",
+    "microsoft teams",
+    "teams",
+
+    "abre onenote",
+    "abre one note",
+    "abrir onenote",
+    "onenote",
+    "one note",
+
+    # web normal
+    "abre google",
+    "abrir google",
+    "abre youtube",
+    "abrir youtube",
+    "youtube",
+    "google",
+    "navegador",
+    "browser",
+    "chrome",
+
+    "abre gmail",
+    "abrir gmail",
+    "abre correo",
+    "abrir correo",
+    "abre drive",
+    "abrir drive",
+    "abre google drive",
+    "abre calendario",
+    "abre google calendar",
+    "abre github",
+    "abrir github",
+    "abre chatgpt",
+    "abrir chatgpt",
+    "abre claude",
+    "abrir claude",
+
+    # carpetas
+    "abre descargas",
+    "abrir descargas",
+    "downloads",
+    "abre documentos",
+    "abrir documentos",
+    "documents",
+    "abre escritorio",
+    "abrir escritorio",
+    "desktop",
+    "abre apuntes",
+    "abrir apuntes",
+        # GitHub aliases
+    "github",
+    "git hub",
+    "guit hub",
+    "githab",
+    "gitjab",
+    "kit hub",
+    "kithub",
+    "kid hu",
+    "kidhu",
+    "kitho",
+    "vit hub",
+    "vithub",
+    "vitzhub",
+    "gijub",
+
+    # ChatGPT aliases
+    "chatgpt",
+    "chat gpt",
+    "chat g p t",
+    "chet gpt",
+    "chetpiti",
+    "chetipiti",
+    "cheetum",
+    "chit gpt",
+    "chad gpt",
+
+    # Claude aliases
+    "claude",
+    "clod",
+    "cloud",
+        # Claude / IA aliases
+    "abre inteligencia artificial",
+    "abrir inteligencia artificial",
+    "inteligencia artificial",
+    "abre ia",
+    "abrir ia",
+    "ia",
+    "abre el asistente",
+    "abrir el asistente",
+    "asistente",
+    "asistente naranja",
+    "abre asistente naranja",
+    "abrir asistente naranja",
+    "chatbot",
+    "chat bot",
+    "abre chatbot",
+    "abrir chatbot",
+    "claude",
+    "clod",
+    "cloud",
+    "anthropic",
+    "antropic",
 ]
 
 
@@ -176,40 +382,47 @@ def _has_any_keyword(text: str, keywords: list[str]) -> bool:
 def _rule_based_intent(text: str):
     """
     Reglas directas para comandos muy claros.
-    Esto mejora frases largas o naturales que el modelo puede clasificar con baja confianza.
+    Esto evita que comandos como 'abre la calculadora' caigan en general.
     """
     t = _normalize(text)
 
-    # CLASS MODE: tiene prioridad sobre otras reglas (excepto emergencia)
+    # CLASS MODE primero porque tiene comandos muy específicos
     if _has_class_mode_keyword(text):
         return "class_mode", 0.97
 
-    # Nivel 2: reglas directas para comandos de asistente
+    # PRESENTATION / DEMO solo con frases claras de demo
     if _has_any_keyword(text, _PRESENTATION_MODE_KEYWORDS):
         return "presentation_mode", 0.96
 
-    # Rutinas compuestas antes que productividad general
+    # SYSTEM: apps locales, Office, web shortcuts y comandos normales
+    if _has_any_keyword(text, _SYSTEM_KEYWORDS):
+        return "system", 0.97
+
+    # Rutinas compuestas
     if _has_any_keyword(text, _ROUTINE_KEYWORDS):
-        # modo estudiar/programar pueden mapear a focus directamente, excepto demo/descanso
-        if _has_any_keyword(text, ["modo demo", "prepara demo"]):
+        if _has_any_keyword(text, ["modo demo", "prepara demo", "prepara la demo"]):
             return "presentation_mode", 0.96
         if _has_any_keyword(text, ["modo descanso"]):
             return "routine", 0.94
         return "focus_mode", 0.96
 
+    # Enfoque / Pomodoro
     if _has_any_keyword(text, _FOCUS_MODE_KEYWORDS):
         return "focus_mode", 0.96
 
+    # Multimedia
     if _has_any_keyword(text, _MEDIA_KEYWORDS):
         return "media", 0.96
 
+    # Archivos
     if _has_any_keyword(text, _FILES_KEYWORDS):
         return "files", 0.96
 
+    # Búsquedas web
     if _has_any_keyword(text, _WEB_SEARCH_KEYWORDS) or _has_any_keyword(text, _WEB_SHORTCUT_KEYWORDS):
         return "system", 0.94
 
-    # NOTAS: comandos explícitos de guardar información
+    # NOTAS
     note_starters = [
         "anota",
         "apunta",
@@ -229,7 +442,7 @@ def _rule_based_intent(text: str):
         if t.startswith(starter):
             return "notes", 0.95
 
-    # PRODUCTIVIDAD: recordatorios, tareas, pendientes, estudio
+    # PRODUCTIVIDAD
     productivity_starters = [
         "recuerdame",
         "recordarme",
@@ -610,6 +823,34 @@ _TRAINING = [
     ("sentinel graba la clase", "class_mode"),
     ("sentinel termina la clase", "class_mode"),
     ("sentinel resume la clase", "class_mode"),
+        ("abre excel", "system"),
+    ("abre microsoft excel", "system"),
+    ("abre una hoja de calculo", "system"),
+    ("abre una hoja de cálculo", "system"),
+    ("quiero abrir excel", "system"),
+
+    ("abre word", "system"),
+    ("abre microsoft word", "system"),
+    ("abre un documento de word", "system"),
+    ("quiero escribir en word", "system"),
+
+    ("abre powerpoint", "system"),
+    ("abre power point", "system"),
+    ("abre una presentacion", "system"),
+    ("abre una presentación", "system"),
+    ("abre diapositivas", "system"),
+
+    ("abre outlook", "system"),
+    ("abre correo de outlook", "system"),
+    ("abre mi correo", "system"),
+
+    ("abre onenote", "system"),
+    ("abre one note", "system"),
+    ("abre mis notas de onenote", "system"),
+
+    ("abre teams", "system"),
+    ("abre microsoft teams", "system"),
+    ("abre una reunion en teams", "system"),
 ]
 
 # ──────────────────────────────────────────────
