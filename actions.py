@@ -1,10 +1,8 @@
 """
-actions.py
-──────────────────────────────────────────────
 Sentinel AI — Capa de acciones locales.
 
 Filosofía: local-first. Las funciones críticas NO dependen de internet ni
-de APIs externas. Las integraciones web como Spotify, YouTube o Google son
+de APIs externas. Las integraciones web como YouTube o Google son
 extras opcionales que se activan cuando el usuario las pide.
 
 Función pública:
@@ -43,6 +41,26 @@ def _contains_any(text: str, keywords) -> bool:
 
 def _is_windows() -> bool:
     return platform.system().lower() == "windows"
+
+
+def _is_macos() -> bool:
+    return platform.system().lower() == "darwin"
+
+
+def _is_linux() -> bool:
+    return platform.system().lower() == "linux"
+
+
+def _run_command(command, shell: bool = False):
+    """
+    Ejecuta comandos sin bloquear Flask.
+    Devuelve (ok, error).
+    """
+    try:
+        subprocess.Popen(command, shell=shell)
+        return True, None
+    except Exception as e:
+        return False, e
 
 
 # ──────────────────────────────────────────────
@@ -84,84 +102,155 @@ _FUN_LINES = [
 # Apps locales
 # ══════════════════════════════════════════════
 def _open_calculator() -> dict:
-    try:
-        if _is_windows():
-            subprocess.Popen("calc.exe", shell=True)
-        else:
-            subprocess.Popen(["gnome-calculator"])
+    if _is_windows():
+        ok, error = _run_command("calc.exe", shell=True)
 
+    elif _is_macos():
+        ok, error = _run_command(["open", "-a", "Calculator"])
+
+        if not ok:
+            ok, error = _run_command(["open", "/System/Applications/Calculator.app"])
+
+    elif _is_linux():
+        ok, error = _run_command(["gnome-calculator"])
+
+    else:
+        ok, error = False, None
+
+    if ok:
         return {
             "response": "Abriendo calculadora.",
             "action_executed": True,
             "action_type": "local_app",
         }
 
-    except Exception as e:
-        return {
-            "response": f"No pude abrir la calculadora automáticamente. ({type(e).__name__})",
-            "action_executed": False,
-            "action_type": "local_app",
-        }
+    return {
+        "response": f"No pude abrir la calculadora. ({type(error).__name__ if error else 'UnsupportedOS'})",
+        "action_executed": False,
+        "action_type": "local_app",
+    }
 
 
 def _open_notepad() -> dict:
-    try:
-        if _is_windows():
-            subprocess.Popen("notepad.exe", shell=True)
-        else:
-            subprocess.Popen(["gedit"])
+    if _is_windows():
+        ok, error = _run_command("notepad.exe", shell=True)
+        app_name = "bloc de notas"
 
+    elif _is_macos():
+        ok, error = _run_command(["open", "-a", "TextEdit"])
+        app_name = "TextEdit"
+
+    elif _is_linux():
+        ok, error = _run_command(["gedit"])
+        app_name = "editor de texto"
+
+    else:
+        ok, error = False, None
+        app_name = "editor de texto"
+
+    if ok:
         return {
-            "response": "Abriendo bloc de notas.",
+            "response": f"Abriendo {app_name}.",
             "action_executed": True,
             "action_type": "local_app",
         }
 
-    except Exception as e:
-        return {
-            "response": f"No pude abrir el bloc de notas. ({type(e).__name__})",
-            "action_executed": False,
-            "action_type": "local_app",
-        }
+    return {
+        "response": f"No pude abrir {app_name}. ({type(error).__name__ if error else 'UnsupportedOS'})",
+        "action_executed": False,
+        "action_type": "local_app",
+    }
 
 
 def _open_explorer() -> dict:
-    try:
-        if _is_windows():
-            subprocess.Popen("explorer.exe", shell=True)
-        else:
-            subprocess.Popen(["xdg-open", os.path.expanduser("~")])
+    if _is_windows():
+        ok, error = _run_command("explorer.exe", shell=True)
+        app_name = "explorador de archivos"
 
+    elif _is_macos():
+        ok, error = _run_command(["open", "-a", "Finder"])
+        app_name = "Finder"
+
+        if not ok:
+            ok, error = _run_command(["open", os.path.expanduser("~")])
+
+    elif _is_linux():
+        ok, error = _run_command(["xdg-open", os.path.expanduser("~")])
+        app_name = "carpeta personal"
+
+    else:
+        ok, error = False, None
+        app_name = "explorador de archivos"
+
+    if ok:
         return {
-            "response": "Abriendo el explorador de archivos.",
+            "response": f"Abriendo {app_name}.",
             "action_executed": True,
             "action_type": "local_app",
         }
 
-    except Exception as e:
-        return {
-            "response": f"No pude abrir el explorador de archivos. ({type(e).__name__})",
-            "action_executed": False,
-            "action_type": "local_app",
-        }
+    return {
+        "response": f"No pude abrir {app_name}. ({type(error).__name__ if error else 'UnsupportedOS'})",
+        "action_executed": False,
+        "action_type": "local_app",
+    }
 
 
 def _open_vscode() -> dict:
-    try:
-        subprocess.Popen("code", shell=True)
+    if _is_macos():
+        ok, error = _run_command(["open", "-a", "Visual Studio Code"])
 
+        if not ok:
+            ok, error = _run_command("code", shell=True)
+
+    elif _is_windows():
+        ok, error = _run_command("code", shell=True)
+
+    elif _is_linux():
+        ok, error = _run_command("code", shell=True)
+
+    else:
+        ok, error = False, None
+
+    if ok:
         return {
             "response": "Abriendo Visual Studio Code.",
             "action_executed": True,
             "action_type": "local_app",
         }
 
-    except Exception:
+    return {
+        "response": f"No pude abrir VS Code. ({type(error).__name__ if error else 'No encontrado'})",
+        "action_executed": False,
+        "action_type": "local_app",
+    }
+
+
+def _open_spotify() -> dict:
+    if _is_windows():
+        ok, error = _run_command("spotify", shell=True)
+
+    elif _is_macos():
+        ok, error = _run_command(["open", "-a", "Spotify"])
+
+    elif _is_linux():
+        ok, error = _run_command(["spotify"])
+
+    else:
+        ok, error = False, None
+
+    if ok:
         return {
-            "response": "No pude abrir VS Code automáticamente. Puede que no esté instalado o no esté en PATH.",
-            "action_executed": False,
+            "response": "Abriendo Spotify.",
+            "action_executed": True,
             "action_type": "local_app",
         }
+
+    return {
+        "response": f"No pude abrir Spotify. ({type(error).__name__ if error else 'No instalado'})",
+        "action_executed": False,
+        "action_type": "local_app",
+    }
 
 
 # ══════════════════════════════════════════════
@@ -172,7 +261,7 @@ def _open_browser_google() -> dict:
         webbrowser.open("https://www.google.com")
 
         return {
-            "response": "Abriendo Google en el navegador. Esta es una función web opcional.",
+            "response": "Abriendo Google en el navegador.",
             "action_executed": True,
             "action_type": "web_extra",
         }
@@ -185,24 +274,6 @@ def _open_browser_google() -> dict:
         }
 
 
-def _open_spotify() -> dict:
-    try:
-        webbrowser.open("https://open.spotify.com")
-
-        return {
-            "response": "Abriendo Spotify en el navegador. Esta función requiere internet.",
-            "action_executed": True,
-            "action_type": "web_extra",
-        }
-
-    except Exception as e:
-        return {
-            "response": f"No pude abrir Spotify. ({type(e).__name__})",
-            "action_executed": False,
-            "action_type": "web_extra",
-        }
-
-
 def _open_youtube_search(text: str) -> dict:
     try:
         query = urllib.parse.quote_plus(text.strip())
@@ -210,7 +281,7 @@ def _open_youtube_search(text: str) -> dict:
         webbrowser.open(url)
 
         return {
-            "response": "Abriendo YouTube con tu búsqueda. Esta función requiere internet.",
+            "response": "Abriendo YouTube con tu búsqueda.",
             "action_executed": True,
             "action_type": "web_extra",
         }
@@ -234,17 +305,15 @@ def _handle_system(text: str) -> dict | None:
     if _contains_any(text, ["calculadora", "calculator", "calc"]):
         return _open_calculator()
 
-    if _contains_any(text, ["bloc de notas", "notepad", "notas de windows"]):
+    if _contains_any(text, ["bloc de notas", "notepad", "notas de windows", "textedit"]):
         return _open_notepad()
 
-    if _contains_any(text, ["explorador", "archivos", "carpeta", "file explorer"]):
+    if _contains_any(text, ["explorador", "archivos", "carpeta", "file explorer", "finder"]):
         return _open_explorer()
 
     if _contains_any(text, ["vs code", "visual studio code", "vscode"]):
         return _open_vscode()
 
-    # Extras web también pueden venir clasificados como SYSTEM,
-    # por ejemplo: "abre Spotify" o "abre YouTube".
     if _contains_any(text, ["spotify"]):
         return _open_spotify()
 
@@ -257,7 +326,7 @@ def _handle_system(text: str) -> dict | None:
     return {
         "response": (
             "Modo sistema detectado. Puedo abrir calculadora, bloc de notas, "
-            "explorador de archivos, VS Code, Spotify, YouTube o el navegador. ¿Cuál?"
+            "explorador de archivos, VS Code, Spotify, YouTube o el navegador."
         ),
         "action_executed": False,
         "action_type": "none",
@@ -329,10 +398,7 @@ def _handle_music(text: str) -> dict:
         return _open_youtube_search(text)
 
     return {
-        "response": (
-            "Modo música detectado. Puedo abrir Spotify o YouTube si hay internet, "
-            "o usar una carpeta local de música en una versión futura."
-        ),
+        "response": "Modo música detectado. Di 'abre Spotify' o 'abre YouTube'.",
         "action_executed": False,
         "action_type": "none",
     }

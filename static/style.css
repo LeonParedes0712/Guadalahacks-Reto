@@ -2,23 +2,44 @@
   box-sizing: border-box;
 }
 
+/* ── FONT LOCAL ── */
+@font-face {
+  font-family: 'Inter Local';
+  src: url('../fonts/Inter_24pt-Medium.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Inter Local';
+  src: url('../fonts/Inter_24pt-Black.ttf') format('truetype');
+  font-weight: bold;
+  font-style: normal;
+}
+
+/* ── BASE ── */
 body {
   margin: 0;
-  font-family: 'Segoe UI', Arial, sans-serif;
-  background: #080b12;
-  color: #f8fafc;
+  font-family: 'Inter Local', Arial, sans-serif;
+  background: #ffffff;
+  color: #066297;
 }
 
 /* ── HERO ── */
 .hero {
-  text-align: center;
-  padding: 40px 20px 28px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 24px 28px;
+  gap: 20px;
 }
 
 .hero h1 {
+  text-align: left;
   font-size: 48px;
-  margin: 10px 0 6px;
+  margin: 10px 0;
   letter-spacing: -1px;
+  color: #066297;
 }
 
 .hero p {
@@ -28,22 +49,30 @@ body {
   text-transform: uppercase;
 }
 
+/* Para que los badges del hero se acomoden bonito */
+.hero > div:last-child {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+/* ── BADGE GENERAL ── */
 .badge {
   display: inline-block;
   background: #16a34a;
   color: white;
-  padding: 6px 16px;
+  padding: 8px 16px;
   border-radius: 999px;
-  font-weight: 700;
-  font-size: 12px;
-  letter-spacing: 1px;
+  font-weight: bold;
+  font-size: 14px;
 }
 
 /* ── GRID ── */
 .dashboard {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: 18px;
+  gap: 20px;
   padding: 20px;
   max-width: 1400px;
   margin: 0 auto;
@@ -51,17 +80,17 @@ body {
 
 /* ── CARD ── */
 .card {
-  background: #111827;
-  border: 1px solid #1f2937;
+  background: #e5edf1;
+  border: 1px solid #102747;
   border-radius: 20px;
   padding: 24px;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 10px 30px rgba(16, 39, 71, 0.18);
 }
 
 .card h2 {
   margin-top: 0;
   margin-bottom: 14px;
-  color: #e5e7eb;
+  color: #102747;
   font-size: 16px;
   text-transform: uppercase;
   letter-spacing: 1px;
@@ -76,19 +105,20 @@ button {
   background: #2563eb;
   color: white;
   font-size: 16px;
-  font-weight: 700;
+  font-weight: bold;
   cursor: pointer;
-  transition: background 0.2s;
+  transition: background 0.2s ease, transform 0.15s ease;
 }
 
 button:hover {
   background: #1d4ed8;
+  transform: translateY(-1px);
 }
 
 /* ── STATUS ── */
 #status {
-  font-weight: 700;
-  color: #38bdf8;
+  font-weight: bold;
+  color: #0284c7;
   font-size: 13px;
   letter-spacing: 1px;
   margin-bottom: 12px;
@@ -100,21 +130,21 @@ button:hover {
   padding: 5px 14px;
   border-radius: 999px;
   font-size: 11px;
-  font-weight: 700;
+  font-weight: bold;
   letter-spacing: 1px;
   margin-bottom: 14px;
   transition: background 0.3s, color 0.3s;
 }
 
 .wake-inactive {
-  background: #1f2937;
-  color: #6b7280;
-  border: 1px solid #374151;
+  background: #dbe6ec;
+  color: #64748b;
+  border: 1px solid #b6c6d1;
 }
 
 .wake-active {
-  background: #14532d;
-  color: #4ade80;
+  background: #dcfce7;
+  color: #15803d;
   border: 1px solid #16a34a;
 }
 
@@ -128,7 +158,7 @@ button:hover {
   align-items: center;
   gap: 8px;
   font-size: 13px;
-  color: #94a3b8;
+  color: #475569;
   cursor: pointer;
 }
 
@@ -143,7 +173,7 @@ button:hover {
 .mono-text {
   font-family: 'Courier New', monospace;
   font-size: 14px;
-  color: #cbd5e1;
+  color: #102747;
   word-break: break-word;
 }
 
@@ -152,10 +182,10 @@ button:hover {
   display: inline-block;
   padding: 6px 18px;
   border-radius: 999px;
-  font-weight: 700;
+  font-weight: bold;
   font-size: 14px;
   letter-spacing: 1px;
-  background: #6b7280;
+  background: #066297;
   color: white;
   margin-bottom: 10px;
   transition: background 0.3s;
@@ -164,11 +194,11 @@ button:hover {
 /* ── CONFIDENCE BAR ── */
 .confidence-container {
   width: 100%;
-  height: 10px;
-  background: #1f2937;
+  height: 14px;
+  background: #10274771;
   border-radius: 999px;
   overflow: hidden;
-  margin: 10px 0 6px;
+  margin: 12px 0;
 }
 
 #confidenceBar {
@@ -176,33 +206,49 @@ button:hover {
   height: 100%;
   background: #22c55e;
   border-radius: 999px;
-  transition: width 0.5s ease, background 0.3s;
+  transition: width 0.4s ease, background 0.3s;
 }
 
 /* ── EMERGENCY ── */
 .emergency-card {
-  border-color: #374151;
+  border-color: #dc2626;
   transition: background 0.4s, border-color 0.4s;
 }
 
 .emergency-active {
-  background: #450a0a !important;
+  background: #7f1d1d !important;
   border-color: #ef4444 !important;
+  color: white;
   animation: pulse-red 1.5s infinite;
 }
 
+.emergency-active h2,
+.emergency-active .mono-text,
+.emergency-active .item-text {
+  color: white;
+}
+
 @keyframes pulse-red {
-  0%, 100% { box-shadow: 0 0 0 0 rgba(239,68,68,0.3); }
-  50%       { box-shadow: 0 0 20px 6px rgba(239,68,68,0.2); }
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.3);
+  }
+  50% {
+    box-shadow: 0 0 20px 6px rgba(239, 68, 68, 0.2);
+  }
 }
 
 /* ── NOTES & TASKS ── */
-.notes-card  { border-color: #065f46; }
-.tasks-card  { border-color: #1e3a5f; }
+.notes-card {
+  border-color: #065f46;
+}
+
+.tasks-card {
+  border-color: #1e3a5f;
+}
 
 .hint {
   font-size: 12px;
-  color: #4b5563;
+  color: #64748b;
   margin: -8px 0 12px;
 }
 
@@ -223,14 +269,14 @@ button:hover {
   align-items: center;
   flex-wrap: wrap;
   gap: 8px;
-  background: #1f2937;
+  background: #dbe6ec;
   border-radius: 10px;
   padding: 10px 12px;
   font-size: 13px;
 }
 
 .item-list li.empty {
-  color: #4b5563;
+  color: #64748b;
   background: transparent;
   font-style: italic;
   font-size: 13px;
@@ -239,14 +285,14 @@ button:hover {
 /* timestamp */
 .ts {
   font-size: 11px;
-  color: #4b5563;
+  color: #64748b;
   white-space: nowrap;
 }
 
 /* intent badge inline */
 .pill {
   font-size: 10px;
-  font-weight: 700;
+  font-weight: bold;
   padding: 2px 10px;
   border-radius: 999px;
   color: white;
@@ -258,13 +304,13 @@ button:hover {
 /* main text */
 .item-text {
   flex: 1;
-  color: #cbd5e1;
+  color: #102747;
 }
 
 /* task done */
 .task-done .item-text {
   text-decoration: line-through;
-  color: #4b5563;
+  color: #64748b;
 }
 
 .done-btn {
@@ -274,7 +320,7 @@ button:hover {
   border-radius: 8px;
   background: #065f46;
   color: #4ade80;
-  font-weight: 700;
+  font-weight: bold;
 }
 
 .done-btn:hover {
@@ -283,18 +329,36 @@ button:hover {
 
 .done-label {
   font-size: 11px;
-  color: #4ade80;
-  font-weight: 700;
+  color: #15803d;
+  font-weight: bold;
 }
 
 /* scrollbar sutil */
 .item-list::-webkit-scrollbar {
   width: 4px;
 }
+
 .item-list::-webkit-scrollbar-track {
   background: transparent;
 }
+
 .item-list::-webkit-scrollbar-thumb {
-  background: #374151;
+  background: #94a3b8;
   border-radius: 4px;
+}
+
+/* ── RESPONSIVE HERO ── */
+@media (max-width: 700px) {
+  .hero {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .hero h1 {
+    font-size: 38px;
+  }
+
+  .hero > div:last-child {
+    justify-content: flex-start;
+  }
 }
